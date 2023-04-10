@@ -1,7 +1,7 @@
 The code of several works on [oimo.io/works](https://oimo.io/works)
 ---
 
-## When you try to compile
+## If you try to compile
 - Use the latest [Haxe](https://haxe.org/)
 - Copy personal libs from [here](https://github.com/saharan/haxelibs/)
 - **I often add breaking changes to the personal libs and projects, do not always expect successful compilations!**
