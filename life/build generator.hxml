@@ -1,0 +1,9 @@
+-cp src
+-cp ../Pot2/src
+-cp ../Muun/src
+-cp ../HGSL/src
+-cp ../Std/src
+-D analyzer-optimize
+-D js-es=6
+--main generator.Main
+--js bin/generator/main.js
