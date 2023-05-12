@@ -10,22 +10,22 @@ class BoxCollider {
 	static final n2s:Array<Vec2> = [Vec2.zero, Vec2.zero, Vec2.zero, Vec2.zero];
 
 	public static function collide(b1:Box, b2:Box, m:Manifold):Void {
-		v1s[0] << b1.p + b1.rot * (Vec2.of(-1, -1) * b1.h);
-		v1s[1] << b1.p + b1.rot * (Vec2.of(-1, 1) * b1.h);
-		v1s[2] << b1.p + b1.rot * (Vec2.of(1, 1) * b1.h);
-		v1s[3] << b1.p + b1.rot * (Vec2.of(1, -1) * b1.h);
-		v2s[0] << b2.p + b2.rot * (Vec2.of(-1, -1) * b2.h);
-		v2s[1] << b2.p + b2.rot * (Vec2.of(-1, 1) * b2.h);
-		v2s[2] << b2.p + b2.rot * (Vec2.of(1, 1) * b2.h);
-		v2s[3] << b2.p + b2.rot * (Vec2.of(1, -1) * b2.h);
-		n1s[0] << -b1.rot.col0;
-		n1s[1] << b1.rot.col1;
-		n1s[2] << b1.rot.col0;
-		n1s[3] << -b1.rot.col1;
-		n2s[0] << -b2.rot.col0;
-		n2s[1] << b2.rot.col1;
-		n2s[2] << b2.rot.col0;
-		n2s[3] << -b2.rot.col1;
+		v1s[0] <<= b1.p + b1.rot * (Vec2.of(-1, -1) * b1.h);
+		v1s[1] <<= b1.p + b1.rot * (Vec2.of(-1, 1) * b1.h);
+		v1s[2] <<= b1.p + b1.rot * (Vec2.of(1, 1) * b1.h);
+		v1s[3] <<= b1.p + b1.rot * (Vec2.of(1, -1) * b1.h);
+		v2s[0] <<= b2.p + b2.rot * (Vec2.of(-1, -1) * b2.h);
+		v2s[1] <<= b2.p + b2.rot * (Vec2.of(-1, 1) * b2.h);
+		v2s[2] <<= b2.p + b2.rot * (Vec2.of(1, 1) * b2.h);
+		v2s[3] <<= b2.p + b2.rot * (Vec2.of(1, -1) * b2.h);
+		n1s[0] <<= -b1.rot.col0;
+		n1s[1] <<= b1.rot.col1;
+		n1s[2] <<= b1.rot.col0;
+		n1s[3] <<= -b1.rot.col1;
+		n2s[0] <<= -b2.rot.col0;
+		n2s[1] <<= b2.rot.col1;
+		n2s[2] <<= b2.rot.col0;
+		n2s[3] <<= -b2.rot.col1;
 
 		var minIndex = -1;
 
@@ -103,7 +103,7 @@ class BoxCollider {
 					break;
 				if (d1 * d2 < 0) {
 					final t = d1 / (d1 - d2);
-					i2 << i1 + (i2 - i1) * t;
+					i2 <<= i1 + (i2 - i1) * t;
 				}
 			}
 			final r2i1 = i1 - r2;
@@ -115,7 +115,7 @@ class BoxCollider {
 					break;
 				if (d1 * d2 < 0) {
 					final t = d1 / (d1 - d2);
-					i1 << i1 + (i2 - i1) * t;
+					i1 <<= i1 + (i2 - i1) * t;
 				}
 			}
 			final d1 = (r1 - i1).dot(n);

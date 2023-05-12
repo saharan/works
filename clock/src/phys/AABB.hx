@@ -10,8 +10,8 @@ class AABB {
 	}
 
 	public inline function set(min:Vec2, max:Vec2):Void {
-		this.min << min;
-		this.max << max;
+		this.min <<= min;
+		this.max <<= max;
 	}
 
 	public function intersects(a:AABB):Bool {

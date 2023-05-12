@@ -1,8 +1,8 @@
 -cp src
 -cp ../Pot/src
 -cp ../Muun/src
--cp ../HGSL/src
 -cp ../Std/src
+-L hgsl
 -D analyzer-optimize
 -D js-es=6
 --main Main

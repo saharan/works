@@ -130,13 +130,13 @@ class Main extends App {
 		final m1 = Vec2.zero;
 		final m2 = Vec2.zero;
 		for (v in vs1) {
-			m1 << v.pos;
+			m1 <<= v.pos;
 		}
 		for (v in vs2) {
-			m2 << v.pos;
+			m2 <<= v.pos;
 		}
-		m1 << m1 / vs1.length;
-		m2 << m2 / vs2.length;
+		m1 <<= m1 / vs1.length;
+		m2 <<= m2 / vs2.length;
 		final d12 = m2 - m1;
 		var v1 = null;
 		var v2 = null;
@@ -295,8 +295,8 @@ class Main extends App {
 
 	function setRainbowColor(to:Vec3, hue:Float, shift:Float):Void {
 		final res = (hue + Vec3.of(0, 0.3, 0.7)) * TWO_PI + frameCount * 0.06 + shift;
-		res << Vec3.of(Math.sin(res.x), Math.sin(res.y), Math.sin(res.z));
-		res << res * Vec3.of(0.5, 0.4, 0.5) + Vec3.of(0.5, 0.4, 0.5);
+		res <<= Vec3.of(Math.sin(res.x), Math.sin(res.y), Math.sin(res.z));
+		res <<= res * Vec3.of(0.5, 0.4, 0.5) + Vec3.of(0.5, 0.4, 0.5);
 		to.x = res.x; // hack: prevent new
 		to.y = res.y;
 		to.z = res.z;
@@ -323,21 +323,21 @@ class Main extends App {
 
 		if (input.mouse.hasInput) {
 			final mouse = input.mouse;
-			mpos << Vec2.of(mouse.x, mouse.y);
+			mpos <<= Vec2.of(mouse.x, mouse.y);
 			pressing = mouse.left;
 			dpressing = mouse.dleft;
 		} else if (input.touches.length > 0) {
 			final touch = input.touches[0];
-			mpos << Vec2.of(touch.x, touch.y);
+			mpos <<= Vec2.of(touch.x, touch.y);
 			pressing = touch.touching;
 			dpressing = touch.dtouching;
 			if (pressing) {
 				mposDelta += (Vec2.of(0, -50) - mposDelta) * 0.1;
 			}
 			if (dpressing == 1) {
-				mposDelta << Vec2.zero;
+				mposDelta <<= Vec2.zero;
 			}
-			mpos << mpos + mposDelta;
+			mpos <<= mpos + mposDelta;
 		}
 
 		final cmpos = Vec2.of(clamp(mpos.x, 30, pot.width - 30), clamp(mpos.y, 30, pot.height - 30));
@@ -400,14 +400,14 @@ class Main extends App {
 							final mean = Vec2.zero;
 							var numVs = 0;
 							draggingBubble.forEachEdge(e -> {
-								mean << mean + e.v.pos;
+								mean <<= mean + e.v.pos;
 								numVs++;
 							});
-							mean << mean * (1 / numVs);
+							mean <<= mean * (1 / numVs);
 							final force = (mpos - mean) * 0.02;
 							final maxForce = 0.8;
 							if (force.lengthSq > maxForce) {
-								force << force * (maxForce / force.length);
+								force <<= force * (maxForce / force.length);
 							}
 							draggingBubble.forEachEdge(e -> {
 								e.v.vel += force;
@@ -417,8 +417,8 @@ class Main extends App {
 				}
 		}
 
-		v1.pos << wand.v1;
-		v2.pos << wand.v;
+		v1.pos <<= wand.v1;
+		v2.pos <<= wand.v;
 	}
 
 	override function update():Void {
@@ -785,8 +785,8 @@ class Main extends App {
 		final len = (p2 - p1).length;
 		if (len > DEFAULT_EDGE_LENGTH * SPLIT_THRESHOLD) {
 			final mid = createVertex((p1 + p2) * 0.5);
-			mid.vel << (v1.vel + v2.vel) * 0.5 * SPLIT_MERGE_DAMP;
-			mid.color << 0.75 * Vec3.of(rand.nextFloat(), rand.nextFloat(), rand.nextFloat()) + 0.25 * (v1.color + v2.color) * 0.5;
+			mid.vel <<= (v1.vel + v2.vel) * 0.5 * SPLIT_MERGE_DAMP;
+			mid.color <<= 0.75 * Vec3.of(rand.nextFloat(), rand.nextFloat(), rand.nextFloat()) + 0.25 * (v1.color + v2.color) * 0.5;
 			mid.hue = 0.75 * Math.random() + 0.25 * (v1.hue + v2.hue) * 0.5;
 			final e12 = e.e;
 			final e21 = e.e.twin;
@@ -838,8 +838,8 @@ class Main extends App {
 			escape(e.e);
 			escape(e.e.twin);
 			final mid = createVertex((p1 + p2) * 0.5);
-			mid.vel << (v1.vel + v2.vel) * 0.5 * SPLIT_MERGE_DAMP;
-			mid.color << (v1.color + v2.color) * 0.5;
+			mid.vel <<= (v1.vel + v2.vel) * 0.5 * SPLIT_MERGE_DAMP;
+			mid.color <<= (v1.color + v2.color) * 0.5;
 			mid.hue = (v1.hue + v2.hue) * 0.5;
 			// reroot
 			{
@@ -899,8 +899,8 @@ class Main extends App {
 		final cd = (vc.pos + vd.pos) * 0.5;
 
 		final mid = (v1.pos + v2.pos) * 0.5;
-		v2.pos << (mid + ab) * 0.5;
-		v1.pos << (mid + cd) * 0.5;
+		v2.pos <<= (mid + ab) * 0.5;
+		v1.pos <<= (mid + cd) * 0.5;
 
 		escape(e12);
 		escape(e21);

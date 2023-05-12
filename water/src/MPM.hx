@@ -95,9 +95,9 @@ class MPM extends App {
 					return;
 				final accOnlyG = (accG - acc) / 9.80665;
 				if (accOnlyG.length > 0.5) {
-					accOnlyG << accOnlyG.normalized;
+					accOnlyG <<= accOnlyG.normalized;
 				}
-				accOnlyG << accOnlyG * 9.80665;
+				accOnlyG <<= accOnlyG * 9.80665;
 
 				final accSum = (accOnlyG + 20 * acc) * sign;
 				this.accX = -accSum.x;
@@ -148,9 +148,8 @@ class MPM extends App {
 
 	function initSimulation():Void {
 		mesh.mode = Triangles;
-		final writer = mesh.writer;
-		writer.clear();
-		writer.color(1, 1, 1);
+		mesh.writer.clear();
+		mesh.writer.color(1, 1, 1);
 		mesh.material.shader = shader;
 		numP = 0;
 		// spawnBox(pot.width * 0.5, 200, 200, 200);
@@ -168,6 +167,7 @@ class MPM extends App {
 		// 		spawnBox(pot.width * 0.5 + (j - 1) * 180, 80 + i * 120, 150, 100);
 		// 	}
 		// }
+		mesh.writer.upload();
 		trace("particles: " + numP);
 	}
 
@@ -186,7 +186,6 @@ class MPM extends App {
 			}
 			y += PDELTA;
 		}
-		mesh.writer.upload();
 	}
 
 	function addParticle(x:Float, y:Float):Void {
@@ -547,9 +546,9 @@ class MPM extends App {
 		final touching = input.touches.length > 0;
 		final touch = touching ? input.touches[0] : null;
 		final mouse = touching ? Vec2.of(touch.x, touch.y) : Vec2.of(input.mouse.x, input.mouse.y);
-		mouse << mouse / scale;
+		mouse /= scale;
 		final dmouse = touching ? Vec2.of(touch.dx, touch.dy) : Vec2.of(input.mouse.dx, input.mouse.dy);
-		dmouse << dmouse / scale * SUBSTEP;
+		dmouse /= scale * SUBSTEP;
 		final rad = 5;
 		final stop = false;
 

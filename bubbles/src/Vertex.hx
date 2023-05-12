@@ -23,14 +23,14 @@ class Vertex {
 	var visitTime:Int = 0;
 
 	public function new(pos:Vec2, vi:VertexIndex) {
-		this.pos << pos;
+		this.pos <<= pos;
 		this.vi = vi;
 		color = Vec3.of(Math.random(), Math.random(), Math.random());
 		hue = Math.random();
 	}
 
 	public function update():Void {
-		pos << pos + vel;
+		pos <<= pos + vel;
 		vel *= 0.99;
 		if (vel.lengthSq > MAX_VELOCITY * MAX_VELOCITY) {
 			vel *= MAX_VELOCITY / vel.length;
@@ -106,7 +106,7 @@ class Vertex {
 		final t = n.star;
 		final w = power;
 		final wind = n * w;
-		vel << vel + wind * Math.abs(t.dot(vel));
+		vel <<= vel + wind * Math.abs(t.dot(vel));
 	}
 
 	extern inline function wind(p:Vec2, time:Float):Float {
@@ -138,6 +138,6 @@ class Vertex {
 		final p2 = next.pos + next.vel;
 		final n1 = -(p1 - p0).star.normalized;
 		final n2 = -(p2 - p1).star.normalized;
-		n << (n1 + n2).normalized;
+		n <<= (n1 + n2).normalized;
 	}
 }

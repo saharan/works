@@ -1,5 +1,3 @@
-package;
-
 import ShaderUtil;
 import haxe.Timer;
 import hgsl.Source;
@@ -471,8 +469,8 @@ class Main extends App {
 		}
 		if (d.length != pbufSrc.totalSize * numParticles)
 			throw "buffer sizes mismatch";
-		pbufSrc.buffer.upload(ArrayBuffer, new Float32Array(d), DynamicCopy);
-		pbufDst.buffer.upload(ArrayBuffer, new Float32Array(d), DynamicCopy);
+		pbufSrc.buffer.upload(new Float32Array(d), DynamicCopy);
+		pbufDst.buffer.upload(new Float32Array(d), DynamicCopy);
 
 		inline function toIndex(i:Int, j:Int, k:Int):Int {
 			return (i * s.PARTICLES_H + j) * s.PARTICLES_D + k;
@@ -744,13 +742,13 @@ class Main extends App {
 		}
 
 		particleMesh.mode = Triangles;
-		meshVertexBuffer.upload(ArrayBuffer, meshVertexData.subarray(0, meshQuadCount * 60), DynamicDraw);
-		meshIndexBuffer.upload(ElementArrayBuffer, meshIndexData.subarray(0, meshQuadCount * 6), DynamicDraw);
+		meshVertexBuffer.upload(meshVertexData.subarray(0, meshQuadCount * 60), DynamicDraw);
+		meshIndexBuffer.upload(meshIndexData.subarray(0, meshQuadCount * 6), DynamicDraw);
 		// trace("uploaded! quads: " + meshQuadCount);
 	}
 
 	function updateRayData():Void {
-		prayDir << rayDir;
+		prayDir <<= rayDir;
 		final screenPos = Vec2.zero;
 		dragging = false;
 		var dpress = 0;
@@ -770,16 +768,16 @@ class Main extends App {
 				dpress = touch.dtouching;
 			}
 		}
-		screenPos << screenPos / Vec2.of(pot.width, pot.height);
+		screenPos <<= screenPos / Vec2.of(pot.width, pot.height);
 		screenPos.y = 1 - screenPos.y;
-		screenPos << screenPos * 2 - 1;
+		screenPos <<= screenPos * 2 - 1;
 
 		renderScene(() -> {
-			rayPos << g.viewToLocal(Vec3.zero);
+			rayPos <<= g.viewToLocal(Vec3.zero);
 			final localPos = g.screenToLocal(screenPos.extend(0));
-			rayDir << (localPos - rayPos).normalized;
+			rayDir <<= (localPos - rayPos).normalized;
 			if (dpress == 1)
-				prayDir << rayDir;
+				prayDir <<= rayDir;
 		});
 	}
 
@@ -963,6 +961,6 @@ class Main extends App {
 	}
 
 	static function main():Void {
-		new Main(cast Browser.document.getElementById("canvas"), false, true);
+		new Main(cast Browser.document.getElementById("canvas"));
 	}
 }

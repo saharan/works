@@ -17,7 +17,7 @@ class Body {
 	public var friction:Float = 0.1;
 
 	public function new(p:Vec2) {
-		this.p << p;
+		this.p <<= p;
 	}
 
 	public function setShape(shape:Shape, density:Float = 1):Body {
@@ -32,10 +32,10 @@ class Body {
 	}
 
 	public function sync():Void {
-		rot << Mat2.rot(ang);
+		rot <<= Mat2.rot(ang);
 		shape.ang = ang;
-		shape.rot << rot;
-		shape.p << p;
+		shape.rot <<= rot;
+		shape.p <<= p;
 		shape.updateAABB();
 	}
 }

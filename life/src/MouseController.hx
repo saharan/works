@@ -27,15 +27,15 @@ class MouseController {
 		final mpos = Vec2.of(mouse.x, mouse.y);
 		final center = Vec2.of(width, height) * 0.5;
 		if (mouse.dleft == 1 && control) {
-			velocity << Vec2.zero;
-			left << Vec2.zero;
+			velocity <<= Vec2.zero;
+			left <<= Vec2.zero;
 			dragging = true;
 		} else if (mouse.dleft == -1 && control) {
 			dragging = false;
 		} else if (mouse.left && control) {
 			final delta = Vec2.of(mouse.dx, mouse.dy);
 			left += delta;
-			velocity << left * 0.5;
+			velocity <<= left * 0.5;
 			left *= 0.5;
 		} else {
 			velocity *= 0.95;
@@ -44,7 +44,7 @@ class MouseController {
 		autoScrollAccum += mouse.wheelY;
 
 		if (autoScrollSign == 0) {
-			anchor << mpos;
+			anchor <<= mpos;
 			if (abs(autoScrollAccum) > 200) {
 				autoScrollSign = sign(autoScrollAccum);
 				autoScrollAccum = 0;

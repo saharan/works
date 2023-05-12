@@ -26,7 +26,7 @@ class Edge {
 	}
 
 	public function preSolve():Void {
-		imp << Vec2.zero;
+		imp <<= Vec2.zero;
 	}
 
 	public function solve():Void {
@@ -44,7 +44,7 @@ class Edge {
 		if (imp.lengthSq > maxImp * maxImp) {
 			imp *= maxImp / imp.length;
 		}
-		dimp << imp - pimp;
+		dimp <<= imp - pimp;
 		v1.vel += v1.invMass * dimp;
 		v2.vel -= v2.invMass * dimp;
 	}

@@ -405,7 +405,7 @@ class Main extends App {
 
 	function drawField():Void {
 		final mpos = Vec2.of(input.mouse.x, input.mouse.y) * 4;
-		mpos << Vec2.of(pot.width * 0.5, pot.height * 0.5);
+		mpos <<= Vec2.of(pot.width * 0.5, pot.height * 0.5);
 		if (input.mouse.middle) {
 			g.beginShape(Lines);
 			g.color(1, 0.1);

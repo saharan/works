@@ -23,9 +23,9 @@ class Item {
 			case Wand:
 				final delta = (pos - v).star;
 				final diff = (delta.dot(direction) < 0 ? -1 : 1) * 0.08 * delta;
-				direction << (direction + diff).normalized;
-				v1 << pos - direction * size;
-				v2 << pos + direction * size;
+				direction <<= (direction + diff).normalized;
+				v1 <<= pos - direction * size;
+				v2 <<= pos + direction * size;
 			case Fan:
 				final delta = (pos - v).star;
 				final dist = delta.length;
@@ -37,9 +37,9 @@ class Item {
 				else if (adiff < -Math.PI)
 					adiff += Math.PI * 2;
 				final newAng = ang1 + adiff * (1 - Math.exp(-dist * 0.05));
-				direction << Vec2.of(Math.cos(newAng), Math.sin(newAng));
-				v1 << pos - direction * size;
-				v2 << pos + direction * size;
+				direction <<= Vec2.of(Math.cos(newAng), Math.sin(newAng));
+				v1 <<= pos - direction * size;
+				v2 <<= pos + direction * size;
 			case Needle:
 				final delta = (pos - (v1 * 0.75 + v2 * 0.25));
 				final dist = delta.length;
@@ -51,10 +51,10 @@ class Item {
 				else if (adiff < -Math.PI)
 					adiff += Math.PI * 2;
 				final newAng = ang1 + adiff * (1 - Math.exp(-dist * 0.05));
-				direction << Vec2.of(Math.cos(newAng), Math.sin(newAng));
-				v1 << pos - direction * size * 0.5;
-				v2 << pos + direction * size * 1.5;
+				direction <<= Vec2.of(Math.cos(newAng), Math.sin(newAng));
+				v1 <<= pos - direction * size * 0.5;
+				v2 <<= pos + direction * size * 1.5;
 		}
-		v << (v1 + v2) * 0.5;
+		v <<= (v1 + v2) * 0.5;
 	}
 }

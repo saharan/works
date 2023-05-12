@@ -51,7 +51,7 @@ class Controller {
 		var updateFocus = false;
 		if (mouse.hasInput) {
 			barTest = true;
-			mpos << Vec2.of(mouse.x, mouse.y);
+			mpos <<= Vec2.of(mouse.x, mouse.y);
 			press = mouse.left;
 			updateFocus = !press;
 		} else {
@@ -62,7 +62,7 @@ class Controller {
 				barTest = true;
 				press = touches[0].touching;
 				updateFocus = touches[0].dtouching == 1;
-				mpos << Vec2.of(touches[0].x, touches[0].y);
+				mpos <<= Vec2.of(touches[0].x, touches[0].y);
 			}
 		}
 		if (barTest) {

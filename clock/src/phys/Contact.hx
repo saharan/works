@@ -47,14 +47,14 @@ class Contact {
 	public inline function set(b1:Body, b2:Body, mp:ManifoldPoint):Contact {
 		this.b1 = b1;
 		this.b2 = b2;
-		rp1 << mp.rp1;
-		rp2 << mp.rp2;
-		lp1 << b1.rot.t * rp1;
-		lp2 << b2.rot.t * rp2;
-		p1 << b1.p + rp1;
-		p2 << b2.p + rp2;
-		n << mp.n;
-		t << n.star;
+		rp1 <<= mp.rp1;
+		rp2 <<= mp.rp2;
+		lp1 <<= b1.rot.t * rp1;
+		lp2 <<= b2.rot.t * rp2;
+		p1 <<= b1.p + rp1;
+		p2 <<= b2.p + rp2;
+		n <<= mp.n;
+		t <<= n.star;
 		depth = mp.depth;
 		return this;
 	}
@@ -128,10 +128,10 @@ class Contact {
 		invM.e10 = invM.e01;
 		massN = 1 / invM.e00;
 		massT = 1 / invM.e11;
-		nl1 << n * invM1;
-		nl2 << n * invM2;
-		tl1 << t * invM1;
-		tl2 << t * invM2;
+		nl1 <<= n * invM1;
+		nl2 <<= n * invM2;
+		tl1 <<= t * invM1;
+		tl2 <<= t * invM2;
 		na1 = cn1 * invI1;
 		na2 = cn2 * invI2;
 		ta1 = ct1 * invI1;

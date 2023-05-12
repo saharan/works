@@ -66,10 +66,10 @@ class TouchController {
 		final pos2 = Vec2.zero;
 
 		if (id1 != -1) {
-			pos1 << Vec2.of(touch1.x, touch1.y);
+			pos1 <<= Vec2.of(touch1.x, touch1.y);
 		}
 		if (id2 != -1) {
-			pos2 << Vec2.of(touch2.x, touch2.y);
+			pos2 <<= Vec2.of(touch2.x, touch2.y);
 		}
 
 		var targetScaleVelocity = -1.0;
@@ -77,8 +77,8 @@ class TouchController {
 			final delta = Vec2.of(touch1.dx, touch1.dy);
 			left += delta;
 			if (touch1.dtouching == 1)
-				left << Vec2.zero;
-			velocity << left * 0.5;
+				left <<= Vec2.zero;
+			velocity <<= left * 0.5;
 			left *= 0.5;
 			if (autoScrollSign == 0)
 				anchor += (pos1 - anchor) * 0.1;
@@ -90,7 +90,7 @@ class TouchController {
 			final delta2 = Vec2.of(touch2.dx, touch2.dy);
 			final delta = (delta1 + delta2) * 0.5;
 			left += delta;
-			velocity << left * 0.5;
+			velocity <<= left * 0.5;
 			left *= 0.5;
 			final d1 = ((pos2 + delta2) - (pos1 + delta1)).length;
 			final d2 = (pos2 - pos1).length;

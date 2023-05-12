@@ -1,12 +1,12 @@
-import pot.graphics.bitmap.BitmapGraphics;
-import pot.graphics.bitmap.Bitmap;
-import muun.la.Vec3;
-import pot.graphics.gl.FrameBuffer;
 import Graph.Node;
 import js.Browser;
 import js.lib.Uint32Array;
 import muun.la.Vec2;
+import muun.la.Vec3;
 import pot.core.App;
+import pot.graphics.bitmap.Bitmap;
+import pot.graphics.bitmap.BitmapGraphics;
+import pot.graphics.gl.FrameBuffer;
 import pot.graphics.gl.Graphics;
 import pot.graphics.gl.Shader;
 import pot.graphics.gl.Texture;
@@ -327,9 +327,9 @@ class Main extends App {
 		g.inScene(() -> {
 			final bgColor = Vec3.zero;
 			if (heat < 0)
-				bgColor << Vec3.of(0, -heat * 0.1, -heat * 0.4);
+				bgColor <<= Vec3.of(0, -heat * 0.1, -heat * 0.4);
 			if (heat > 0)
-				bgColor << Vec3.of(heat * 0.4, heat * 0.1, 0);
+				bgColor <<= Vec3.of(heat * 0.4, heat * 0.1, 0);
 			g.color(bgColor, 1 / (1 + (heat > 0 ? heat * heat * 4 : -heat * 4)));
 			g.fullScreenRect();
 

@@ -1,5 +1,3 @@
-package;
-
 import ShaderUtil;
 import hgsl.Global.*;
 import hgsl.ShaderMain;

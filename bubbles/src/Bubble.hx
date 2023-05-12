@@ -31,7 +31,7 @@ class Bubble {
 			final p1 = v1.pos + v1.vel;
 			final p2 = v2.pos + v2.vel;
 			v1.updateNormal(e);
-			nsum << nsum + v1.n;
+			nsum += v1.n;
 			currentArea += 0.5 * p1.cross(p2);
 			if (e.twin.bubble != this) {
 				length += (p2 - p1).length;
@@ -44,7 +44,7 @@ class Bubble {
 		forEachEdge(e -> {
 			if (e.twin.bubble != this) {
 				final v = e.v;
-				v.vel << v.vel + v.n * pressure + shift;
+				v.vel += v.n * pressure + shift;
 			}
 		});
 	}

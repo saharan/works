@@ -70,7 +70,7 @@ class Main extends App {
 		}
 		final ang = Math.PI * 2 * Date.now().getTime() / 1000 / 60;
 		final scale = Vec3.of(0.15, 0.1, 0.2);
-		bgColor << (Vec3.of(Math.cos(ang - Math.PI * 2 / 3), Math.cos(ang + Math.PI * 2 / 3), Math.cos(ang)) * 0.5 + 0.5) * scale;
+		bgColor <<= (Vec3.of(Math.cos(ang - Math.PI * 2 / 3), Math.cos(ang + Math.PI * 2 / 3), Math.cos(ang)) * 0.5 + 0.5) * scale;
 		for (l in layers) {
 			l.nextFrame();
 		}
@@ -95,11 +95,12 @@ class Main extends App {
 				final t = 1 - abs(l.position() - 1);
 				final c = Math.pow(t, 0.75);
 				final c2 = Math.pow(t, 10);
-				color << if (l.secondsString.charAt(1) == "0") {
+				final tmp = if (l.secondsString.charAt(1) == "0") {
 					bgColor + c * 0.7 + c2 * 1.0;
 				} else {
 					bgColor + c * 0.7 + c2 * 0.4;
 				}
+				color <<= tmp;
 				alpha = c;
 				for (b in l.w.bs)
 					if (b.invM > 0)

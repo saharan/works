@@ -100,7 +100,7 @@ class World {
 	function stepBackward():Void {
 		checkCollision();
 		for (b in bs) {
-			b.v << -b.v;
+			b.v <<= -b.v;
 			b.av = -b.av;
 		}
 		for (c in cs) {
@@ -120,7 +120,7 @@ class World {
 			b.ang += b.av;
 			b.sync();
 
-			b.v << -b.v;
+			b.v <<= -b.v;
 			b.av = -b.av;
 		}
 	}

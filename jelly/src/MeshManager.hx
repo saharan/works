@@ -1,5 +1,3 @@
-package;
-
 import js.lib.Int32Array;
 
 typedef Array3<A> = Array<Array<Array<A>>>;
