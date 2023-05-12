@@ -3,12 +3,14 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width,initial-scale=1.0,minimum-scale=1.0">
-	<title>Jelly</title>
+	<title>Chill</title>
 	<style>
 		html {
 			width: 100%;
 			height: 100%;
 			margin: 0;
+			user-select: none;
+			-webkit-user-select: none;
 		}
 
 		body {
@@ -16,6 +18,17 @@
 			height: 100%;
 			margin: 0;
 			overflow: hidden;
+			position: relative;
+		}
+
+		#hud {
+			font-family: 'Courier New', Courier, monospace;
+			color: #fff;
+			position: absolute;
+			right: calc((100% - min(100%, 800px)) * 0.5);
+			bottom: 0;
+			padding: 16px;
+			line-height: 150%;
 		}
 
 		#wrapper {
@@ -28,32 +41,6 @@
 			height: 100%;
 			display: block;
 		}
-
-		#menu {
-			position: absolute;
-			display: flex;
-			flex-direction: column;
-
-			left: 16px;
-			top: 16px;
-			font-family: 'Courier New', Courier, monospace;
-			font-size: 16px;
-			font-weight: bold;
-			color: white;
-			user-select: none;
-			-webkit-user-select: none;
-		}
-
-		.menu-item {
-			display: flex;
-			align-items: center;
-			margin-right: 4px;
-		}
-
-		.menu-row {
-			display: flex;
-			margin-bottom: 4px;
-		}
 	</style>
 </head>
 
@@ -64,17 +51,15 @@
 			<path fill="#fff" d="M 20 23 A 8 8 0 1 0 36 23 A 8 8 0 1 0 20 23 Z M 32 11 A 3 3 0 1 0 38 11 A 3 3 0 1 0 32 11 Z"></path>
 		</svg>
 	</a>
-	<div id="menu">
-		<div class="menu-row">
-			<label class="menu-item"><input type="radio" name="quality" id="low">Low</label>
-			<label class="menu-item"><input type="radio" name="quality" id="medium">Medium</label>
-			<label class="menu-item"><input type="radio" name="quality" id="high">High</label>
-			<label class="menu-item"><input type="radio" name="quality" id="super">Super</label>
-		</div>
-		<div class="menu-row">
-			<label class="menu-item"><input type="checkbox" id="box">Box</label>
-			<label class="menu-item"><input type="checkbox" id="velocity">Velocity</label>
-		</div>
+	<div id="hud">
+		<input type="range" id="radius" min="0" max="2" value="1" step="any">
+		<label for="radius">Radius</label><br>
+		<input type="range" id="power" min="0" max="2" value="1" step="any">
+		<label for="power">Power</label><br>
+		<input type="range" id="vorticity" min="0" max="2" value="1" step="any">
+		<label for="vorticity">Vorticity</label><br>
+		<input type="range" id="ventilation" min="0" max="2" value="1" step="any">
+		<label for="ventilation">Ventilation</label>
 	</div>
 	<div id="wrapper"><canvas id="canvas"></canvas></div>
 	<script src="main.js"></script>
