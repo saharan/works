@@ -1,0 +1,9 @@
+-cp src
+-cp ../Pot/src
+-cp ../Muun/src
+-cp ../Std/src
+-L hgsl
+-D analyzer-optimize
+-D js-es=6
+-main Main
+--js bin/main.js
