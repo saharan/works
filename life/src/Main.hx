@@ -70,17 +70,7 @@ class Main extends App {
 		speedTextG = speedText.getGraphics();
 		speedTextTexture = g.loadBitmap(speedText);
 
-		ImageLoader.loadImages(["graph.png", "anim.png", "loc.png"], imgs -> {
-			final graphImg = imgs[0];
-			final animImg = imgs[1];
-			final locImg = imgs[2];
-			graphImg.loadPixels();
-			animImg.loadPixels();
-			locImg.loadPixels();
-			final decoder = new Decoder();
-			decoder.decodeGraph(cast graphImg.pixels);
-			decoder.decodeAnim(cast animImg.pixels);
-			decoder.decodeLocation(cast locImg.pixels);
+		function onDecoded(decoder: Decoder) {
 			graph = decoder.graph;
 			frames = decoder.frames;
 			sampler = new Sampler(graph, frames);
@@ -92,6 +82,36 @@ class Main extends App {
 			final cover = Browser.document.getElementById("cover");
 			cover.parentElement.removeChild(cover);
 			pot.start();
+		}
+
+		// Old load - relied on accurate CanvasRenderingContext2D::drawImage
+		// Fails in some browsers with anti-fingerprinting features enabled
+
+		/*
+		ImageLoader.loadImages(["graph.png", "anim.png", "loc.png"], imgs -> {
+			final graphImg = imgs[0];
+			final animImg = imgs[1];
+			final locImg = imgs[2];
+			graphImg.loadPixels();
+			animImg.loadPixels();
+			locImg.loadPixels();
+
+			final decoder = new Decoder();
+			decoder.decodeGraph(cast graphImg.pixels);
+			decoder.decodeAnim(cast animImg.pixels);
+			decoder.decodeLocation(cast locImg.pixels);
+			onDecoded(decoder);
+		});
+		*/
+
+		// Fixed load - relies on fetch() and the 'format' haxe library for png decoding
+
+		PNGLoader.loadImages(["graph.png", "anim.png", "loc.png"], pixelData -> {
+			final decoder = new Decoder();
+			decoder.decodeGraph(pixelData[0]);
+			decoder.decodeAnim(pixelData[1]);
+			decoder.decodeLocation(pixelData[2]);
+			onDecoded(decoder);
 		});
 	}
 
