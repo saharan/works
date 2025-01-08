@@ -6,6 +6,10 @@ The code of several works on [oimo.io/works](https://oimo.io/works)
 - Copy personal libs from [here](https://github.com/saharan/haxelibs/)
 - **I often add breaking changes to the personal libs and projects, do not always expect successful compilations!**
 
+## Drops
+[![](imgs/drops.png)](https://oimo.io/works/drops/)  
+Code: [`/drops`](drops)
+
 ## Marimo
 [![](imgs/marimo.png)](https://oimo.io/works/marimo/)  
 Code: [`/marimo`](marimo)

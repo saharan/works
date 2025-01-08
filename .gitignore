@@ -1,5 +1,9 @@
 /Muun/
 /Pot/
 /Std/
-main.js
+*.d.ts
+*.map
+*.js
+*.wasm
+*.wat
 /checker.sh

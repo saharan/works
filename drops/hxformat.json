@@ -1,0 +1,51 @@
+{
+	"wrapping": {
+		"maxLineLength": 120,
+		"callParameter": {
+			"defaultWrap": "equalNumber"
+		},
+		"opAddSubChain": {
+			"defaultWrap": "equalNumber"
+		},
+		"opBoolChain": {
+			"defaultWrap": "equalNumber"
+		},
+		"arrayWrap": {
+			"rules": [
+				{
+					"conditions": [
+						{
+							"cond": "totalItemLength >= n",
+							"value": 1000
+						},
+						{
+							"cond": "allItemLengths <= n",
+							"value": 16
+						}
+					],
+					"type": "fillLine"
+				},
+				{
+					"conditions": [
+						{
+							"cond": "totalItemLength >= n",
+							"value": 120
+						}
+					],
+					"type": "onePerLine"
+				}
+			]
+		}
+	},
+	"lineEnds": {
+		"emptyCurly": "break"
+	},
+	"sameLine": {
+		"expressionCase": "next",
+		"caseBody": "next",
+		"expressionIf": "next"
+	},
+	"whitespace": {
+		"functionTypeHaxe3Policy": "around"
+	}
+}
