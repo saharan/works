@@ -781,7 +781,7 @@ class Main extends App {
 			trace("number of speculative neighbors: " + (numN - numActualN) + " (" + (numN - numActualN) / numN * 100 +
 				"%)");
 		} else {
-			// spacial hashing, O(N)
+			// spatial hashing, O(N)
 			wasm.clear();
 			for (p in ps) {
 				wasm.addParticle(p.pos.x, p.pos.y, p.pos.z, p.vel.x, p.vel.y, p.vel.z);
