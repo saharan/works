@@ -183,11 +183,11 @@ class Main extends App {
 			pdata = new Float32Array(wasm.memory.buffer, wasm.particles());
 			cdata = new Float32Array(wasm.memory.buffer, wasm.cells());
 
-			low.onclick = changeRes.bind(16);
-			medium.onclick = changeRes.bind(12);
-			high.onclick = changeRes.bind(8);
+			low.onclick = changeRes.bind(12);
+			medium.onclick = changeRes.bind(8);
+			high.onclick = changeRes.bind(6);
 			sup.onclick = changeRes.bind(4);
-			high.click();
+			medium.click();
 			pot.start();
 		}));
 	}
