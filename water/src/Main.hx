@@ -1,15 +1,18 @@
+import js.Syntax;
+import haxe.Timer;
 import js.Browser;
 import js.html.DeviceMotionEvent;
 import js.html.InputElement;
-import js.lib.Float64Array;
+import js.lib.Float32Array;
+import js.lib.Int32Array;
 import js.lib.Promise;
+import js.lib.WebAssembly;
 import muun.la.Mat2;
 import muun.la.Vec2;
 import pot.core.App;
 import pot.graphics.gl.Graphics;
 import pot.graphics.gl.Object;
 import pot.graphics.gl.Shader;
-import pot.input.CodeValue;
 import pot.util.XorShift;
 
 private enum abstract ParticleField(Int) to Int {
@@ -36,7 +39,7 @@ private enum abstract CellField(Int) to Int {
 	final SIZE;
 }
 
-class MPM extends App {
+class Main extends App {
 	var g:Graphics;
 
 	static inline final MAX_PARTICLES:Int = 262144;
@@ -45,14 +48,15 @@ class MPM extends App {
 
 	static inline final MAX_CELLS:Int = 262144;
 
-	final pdata:Float64Array = new Float64Array(MAX_PARTICLES * ParticleField.SIZE);
-	final cdata:Float64Array = new Float64Array(MAX_CELLS * CellField.SIZE);
+	var pdata:Float32Array = new Float32Array(MAX_PARTICLES * ParticleField.SIZE);
+	var cdata:Float32Array = new Float32Array(MAX_CELLS * CellField.SIZE);
 
 	var scale:Float = 8.0;
 
 	static inline final PDELTA:Float = 0.5;
 	static inline final DENSITY:Float = 1 / (PDELTA * PDELTA);
-	static inline final GRAVITY:Float = 0.008;
+	static inline final INV_DENSITY:Float = 1 / DENSITY;
+	static inline final GRAVITY:Float = 0.0075;
 	static inline final SUBSTEP:Int = 2;
 
 	static inline final AERATION_THRESHOLD:Float = 0.7;
@@ -72,20 +76,32 @@ class MPM extends App {
 
 	var shader:Shader;
 
+	var wasm:WasmLogic;
+
+	var useWasm:Bool = false;
+	var deviceMotionEnabled:Bool = false;
+
 	override function setup():Void {
 		g = new Graphics(canvas);
 		g.init2D();
-		g.enableDepthTest();
 
 		mesh = g.createObject();
-		shader = g.createShader(MPMShader.vertexSource, MPMShader.fragmentSource);
+		shader = g.createShader(WaterShader.vertexSource, WaterShader.fragmentSource);
 
-		initSimulation();
-
-		var request:() -> Promise<String> = untyped DeviceMotionEvent.requestPermission;
-		var addDeviceMotionEvent = () -> {
-			final sign = ~/iPhone|iPad/.match(Browser.navigator.userAgent) ? -1.0 : 1.0;
+		final request:() -> Promise<String> = untyped DeviceMotionEvent.requestPermission;
+		var deviceMotionAdded:Bool = false;
+		final addDeviceMotionEvent = () -> {
+			if (deviceMotionAdded)
+				return;
+			deviceMotionAdded = true;
+			// everything weird thanks to Apple, see https://blog.oimo.io/2023/11/28/devicemotion/
+			final sign = ~/iPhone|Macintosh/.match(Browser.navigator.userAgent) ? -1.0 : 1.0;
 			Browser.window.addEventListener("devicemotion", (e:DeviceMotionEvent) -> {
+				if (!deviceMotionEnabled) {
+					accX = 0;
+					accY = -9.80665;
+					return;
+				}
 				if (e.accelerationIncludingGravity == null || e.acceleration == null)
 					return;
 				final rot = Math.isFinite(Browser.window.orientation) ? Mat2.rot(Browser.window.orientation * Math.PI / 180) : Mat2.id;
@@ -113,43 +129,72 @@ class MPM extends App {
 		final sup:InputElement = cast Browser.document.getElementById("super");
 		final changeRes = function(scale:Float) {
 			var coeff = 1 / (1 + (Browser.window.devicePixelRatio - 1) * 0.5);
-			final maxRes = 800 * 800;
+			final maxRes = 1000 * 1000;
 			final res = pot.width * pot.height;
 			coeff *= Math.sqrt(Math.max(1, res / maxRes));
 			this.scale = scale * coeff;
 			initSimulation();
 		}
-		low.onclick = changeRes.bind(16);
-		medium.onclick = changeRes.bind(12);
-		high.onclick = changeRes.bind(8);
-		sup.onclick = changeRes.bind(4);
-		high.click();
 
-		final cover = Browser.document.getElementById("cover");
-		final start = function() {
-			pot.start();
-			cover.style.display = "none";
-			cover.onclick = null;
+		final enableWasm:InputElement = cast Browser.document.getElementById("wasm");
+		final enableAcc:InputElement = cast Browser.document.getElementById("acc");
+
+		useWasm = enableWasm.checked;
+
+		enableWasm.oninput = function() {
+			useWasm = enableWasm.checked;
 		}
 
-		cover.onclick = function() {
-			if (request == null) {
-				addDeviceMotionEvent();
-				start();
-			} else {
-				request().then(state -> {
-					if (state == "granted") {
-						addDeviceMotionEvent();
-					}
-				}).finally(start);
+		enableAcc.oninput = function() {
+			deviceMotionEnabled = enableAcc.checked;
+			if (deviceMotionEnabled && !deviceMotionAdded) {
+				// try to add event
+				if (request == null) {
+					addDeviceMotionEvent();
+				} else {
+					request().then(state -> {
+						if (state == "granted") {
+							addDeviceMotionEvent();
+						} else {
+							deviceMotionEnabled = false;
+							enableAcc.checked = false;
+						}
+					});
+				}
 			}
 		}
+
+		Browser.window.fetch("main.wasm").then(res -> WebAssembly.instantiateStreaming(res, {}).then((res) -> {
+			final exports = res.instance.exports;
+
+			wasm = cast {
+			};
+
+			// protect functions from closure compiler
+			Syntax.code("{0}.particles = {1}[\"particles\"];", wasm, exports);
+			Syntax.code("{0}.cells = {1}[\"cells\"];", wasm, exports);
+			Syntax.code("{0}.setGrid = {1}[\"setGrid\"];", wasm, exports);
+			Syntax.code("{0}.p2g = {1}[\"p2g\"];", wasm, exports);
+			Syntax.code("{0}.updateGrid = {1}[\"updateGrid\"];", wasm, exports);
+			Syntax.code("{0}.g2p = {1}[\"g2p\"];", wasm, exports);
+			Syntax.code("{0}.memory = {1}[\"memory\"];", wasm, exports);
+			Syntax.code("{0}.numP = {1}[\"numP\"];", wasm, exports);
+
+			pdata = new Float32Array(wasm.memory.buffer, wasm.particles());
+			cdata = new Float32Array(wasm.memory.buffer, wasm.cells());
+
+			low.onclick = changeRes.bind(16);
+			medium.onclick = changeRes.bind(12);
+			high.onclick = changeRes.bind(8);
+			sup.onclick = changeRes.bind(4);
+			high.click();
+			pot.start();
+		}));
 	}
 
 	function initSimulation():Void {
-		mesh.mode = Triangles;
+		mesh.mode = Points;
 		mesh.writer.clear();
-		mesh.writer.color(1, 1, 1);
 		mesh.material.shader = shader;
 		numP = 0;
 		// spawnBox(pot.width * 0.5, 200, 200, 200);
@@ -168,6 +213,10 @@ class MPM extends App {
 		// 	}
 		// }
 		mesh.writer.upload();
+
+		// sync numP
+		new Int32Array(wasm.memory.buffer, wasm.numP.value)[0] = numP;
+
 		trace("particles: " + numP);
 	}
 
@@ -203,30 +252,53 @@ class MPM extends App {
 		pdata[p++] = 0;
 		pdata[p++] = 0;
 		numP++;
-		final writer = mesh.writer;
-		writer.texCoord(0, 0);
-		final v1 = writer.vertex(0, 0, 0, false);
-		writer.texCoord(0, 1);
-		final v2 = writer.vertex(0, 0, 0, false);
-		writer.texCoord(1, 1);
-		final v3 = writer.vertex(0, 0, 0, false);
-		writer.texCoord(1, 0);
-		final v4 = writer.vertex(0, 0, 0, false);
-		writer.index(v1);
-		writer.index(v2);
-		writer.index(v3);
-		writer.index(v1);
-		writer.index(v3);
-		writer.index(v4);
+		mesh.writer.vertex(0, 0, 0);
+	}
+
+	function updateMesh():Void {
+		final colorData = mesh.writer.colorWriter.data;
+		var p = 0;
+		var colIdx = 0;
+		final pixelScale = canvas.width / pot.width;
+		for (i in 0...numP) {
+			final px = pdata[p + ParticleField.POS_X];
+			final py = pdata[p + ParticleField.POS_Y];
+			final vx = pdata[p + ParticleField.VEL_X];
+			final vy = pdata[p + ParticleField.VEL_Y];
+			final d = pdata[p + ParticleField.DENSITY] * INV_DENSITY;
+			final pos = Vec2.of(px, py) * scale;
+			final s = scale * PDELTA * 0.85 * min(d + 0.5, 1.5) * 2 * pixelScale;
+			final t = clamp(pdata[p + ParticleField.AERATION], 0, 1);
+			colorData[colIdx++] = pos.x;
+			colorData[colIdx++] = pos.y;
+			colorData[colIdx++] = s;
+			colorData[colIdx++] = t;
+			p += ParticleField.SIZE;
+		}
+		mesh.writer.colorWriter.upload(true);
 	}
 
 	override function update():Void {
 		// if (input.keyboard[Space].ddown == 1)
 		// 	initSimulation();
+
+		final st = Timer.stamp();
 		for (t in 0...SUBSTEP) {
-			prepareGrid();
-			step();
+			if (useWasm)
+				stepWasm();
+			else
+				step();
 		}
+		updateMesh();
+		final en = Timer.stamp();
+		static final info = Browser.document.getElementById("info");
+		info.innerHTML = "Particles: "
+			+ numP
+			+ "<br>Time: "
+			+ Math.round((en - st) * 1000 * 1000) / 1000
+			+ "ms ("
+			+ (useWasm ? "WASM" : "JS")
+			+ ")";
 	}
 
 	function prepareGrid():Void {
@@ -244,14 +316,6 @@ class MPM extends App {
 				cdata[p++] = 0;
 			}
 		}
-	}
-
-	extern inline function min(a:Float, b:Float):Float {
-		return a < b ? a : b;
-	}
-
-	extern inline function max(a:Float, b:Float):Float {
-		return a > b ? a : b;
 	}
 
 	extern inline function clamp(x:Float, min:Float, max:Float):Float {
@@ -300,6 +364,8 @@ class MPM extends App {
 	}
 
 	function step():Void {
+		prepareGrid();
+
 		final pdata = this.pdata;
 		final cdata = this.cdata;
 
@@ -771,6 +837,40 @@ class MPM extends App {
 		}
 	}
 
+	function stepWasm():Void {
+		gridW = Std.int(pot.width / scale) + 1;
+		gridH = Std.int(pot.height / scale) + 1;
+		numC = gridW * gridH;
+		wasm.setGrid(gridW, gridH);
+
+		final touching = input.touches.length > 0;
+		final touch = touching ? input.touches[0] : null;
+		final mouse = touching ? Vec2.of(touch.x, touch.y) : Vec2.of(input.mouse.x, input.mouse.y);
+		mouse /= scale;
+		final dmouse = touching ? Vec2.of(touch.dx, touch.dy) : Vec2.of(input.mouse.dx, input.mouse.dy);
+		dmouse /= scale * SUBSTEP;
+		final rad = 5;
+		final stop = false;
+
+		if (!(touching && touch.touching || input.mouse.left)) {
+			mouse.x = -256;
+			mouse.y = -256;
+		}
+
+		final gx = accX / 9.80665 * GRAVITY;
+		final gy = -accY / 9.80665 * GRAVITY;
+
+		wasm.p2g();
+		wasm.updateGrid(gx, gy, mouse.x, mouse.y, dmouse.x, dmouse.y, rad);
+		wasm.g2p();
+
+		// add randomness to avoid particle clustering
+		for (i in 0...numP) {
+			pdata[i * ParticleField.SIZE + ParticleField.POS_X] += rand.nextFloat(-1e-4, 1e-4);
+			pdata[i * ParticleField.SIZE + ParticleField.POS_Y] += rand.nextFloat(-1e-4, 1e-4);
+		}
+	}
+
 	override function draw():Void {
 		g.screen(pot.width, pot.height);
 		g.inScene(renderScene);
@@ -785,122 +885,104 @@ class MPM extends App {
 		final drawParticles = true;
 
 		if (drawCellColor) {
-			g.beginShape(Triangles);
-			var p = 0;
-			for (i in 0...gridH) {
-				for (j in 0...gridW) {
-					final x = (j + 0.5) * scale;
-					final y = (i + 0.5) * scale;
-					final d = 0.5 * scale;
-					var f = cdata[p + CellField.MASS] / DENSITY;
-					g.color(f, 0, 1 - f);
-					g.vertex(x - d, y - d);
-					g.vertex(x - d, y + d);
-					g.vertex(x + d, y + d);
-					g.vertex(x - d, y - d);
-					g.vertex(x + d, y + d);
-					g.vertex(x + d, y - d);
-					p += CellField.SIZE;
+			g.shaping(Triangles, () -> {
+				// var p = 0;
+				// for (i in 0...gridH) {
+				// 	for (j in 0...gridW) {
+				// 		final x = (j + 0.5) * scale;
+				// 		final y = (i + 0.5) * scale;
+				// 		final d = 0.5 * scale;
+				// 		var f = cdata[p + CellField.MASS] / DENSITY;
+				// 		g.color(f, 0, 1 - f);
+				// 		g.vertex(x - d, y - d);
+				// 		g.vertex(x - d, y + d);
+				// 		g.vertex(x + d, y + d);
+				// 		g.vertex(x - d, y - d);
+				// 		g.vertex(x + d, y + d);
+				// 		g.vertex(x + d, y - d);
+				// 		p += CellField.SIZE;
+				// 	}
+				// }
+
+				final wasmCs = new Float32Array(wasm.memory.buffer, wasm.cells());
+				var p = 0;
+				for (i in 0...gridH) {
+					for (j in 0...gridW) {
+						final x = (j + 0.5) * scale;
+						final y = (i + 0.5) * scale;
+						final d = 0.5 * scale;
+						var f = wasmCs[p + CellField.MASS] * INV_DENSITY;
+						g.color(f, 0, 1 - f);
+						g.vertex(x - d, y - d);
+						g.vertex(x - d, y + d);
+						g.vertex(x + d, y + d);
+						g.vertex(x - d, y - d);
+						g.vertex(x + d, y + d);
+						g.vertex(x + d, y - d);
+						p += CellField.SIZE;
+					}
 				}
-			}
-			g.endShape();
+			});
 		}
-		g.beginShape(Lines);
-		if (drawGrid) {
-			g.color(1, 1, 1, 0.2);
-			{
-				var x = scale;
-				while (x < pot.width) {
-					g.vertex(x, 0);
-					g.vertex(x, pot.height);
-					x += scale;
+		g.shaping(Lines, () -> {
+			if (drawGrid) {
+				g.color(1, 1, 1, 0.2);
+				{
+					var x = scale;
+					while (x < pot.width) {
+						g.vertex(x, 0);
+						g.vertex(x, pot.height);
+						x += scale;
+					}
+				}
+				{
+					var y = scale;
+					while (y < pot.height) {
+						g.vertex(0, y);
+						g.vertex(pot.width, y);
+						y += scale;
+					}
 				}
 			}
-			{
-				var y = scale;
-				while (y < pot.height) {
-					g.vertex(0, y);
-					g.vertex(pot.width, y);
-					y += scale;
+			if (drawVel) {
+				g.color(1, 1, 1);
+				// var cidx = 0;
+				// for (i in 0...gridH) {
+				// 	for (j in 0...gridW) {
+				// 		final x = (j + 0.5) * scale;
+				// 		final y = (i + 0.5) * scale;
+				// 		final vx = cdata[cidx + CellField.VEL_X] * 2 * scale;
+				// 		final vy = cdata[cidx + CellField.VEL_Y] * 2 * scale;
+				// 		g.vertex(x, y);
+				// 		g.vertex(x + vx, y + vy);
+				// 		cidx += CellField.SIZE;
+				// 	}
+				// }
+
+				final wasmCs = new Float32Array(wasm.memory.buffer, wasm.cells());
+				var cidx = 0;
+				for (i in 0...gridH) {
+					for (j in 0...gridW) {
+						final x = (j + 0.5) * scale;
+						final y = (i + 0.5) * scale;
+						final vx = wasmCs[cidx + CellField.VEL_X] * 2 * scale;
+						final vy = wasmCs[cidx + CellField.VEL_Y] * 2 * scale;
+						g.vertex(x, y);
+						g.vertex(x + vx, y + vy);
+						cidx += CellField.SIZE;
+					}
 				}
 			}
-		}
-		if (drawVel) {
-			g.color(1, 1, 1);
-			var cidx = 0;
-			for (i in 0...gridH) {
-				for (j in 0...gridW) {
-					final x = (j + 0.5) * scale;
-					final y = (i + 0.5) * scale;
-					final vx = cdata[cidx + CellField.VEL_X] * 2 * scale;
-					final vy = cdata[cidx + CellField.VEL_Y] * 2 * scale;
-					g.vertex(x, y);
-					g.vertex(x + vx, y + vy);
-					cidx += CellField.SIZE;
-				}
-			}
-		}
-		g.endShape();
+		});
 
 		if (drawParticles) {
-			final posData = mesh.writer.positionWriter.data;
-			final colData = mesh.writer.colorWriter.data;
-			var p = 0;
-			var posIdx = 0;
-			var colIdx = 0;
-			for (i in 0...numP) {
-				final px = pdata[p + ParticleField.POS_X];
-				final py = pdata[p + ParticleField.POS_Y];
-				final vx = pdata[p + ParticleField.VEL_X];
-				final vy = pdata[p + ParticleField.VEL_Y];
-				final d = pdata[p + ParticleField.DENSITY] / DENSITY;
-				final pos = Vec2.of(px, py) * scale;
-				final s = scale * PDELTA * 0.85 * min(d + 0.5, 1.5); // * p.jacobian;
-				final t = clamp(pdata[p + ParticleField.AERATION], 0, 1); // Math.min(topSpeed, Math.sqrt(vx * vx + vy * vy)) / topSpeed;
-				colData[colIdx++] = vx;
-				colData[colIdx++] = vy;
-				colData[colIdx++] = t;
-				colIdx++;
-				colData[colIdx++] = vx;
-				colData[colIdx++] = vy;
-				colData[colIdx++] = t;
-				colIdx++;
-				colData[colIdx++] = vx;
-				colData[colIdx++] = vy;
-				colData[colIdx++] = t;
-				colIdx++;
-				colData[colIdx++] = vx;
-				colData[colIdx++] = vy;
-				colData[colIdx++] = t;
-				colIdx++;
-				final ex = Vec2.ex * s;
-				final ey = Vec2.ey * s;
-				final p1 = pos - ex - ey;
-				final p2 = pos - ex + ey;
-				final p3 = pos + ex + ey;
-				final p4 = pos + ex - ey;
-				posData[posIdx++] = p1.x;
-				posData[posIdx++] = p1.y;
-				posIdx++;
-				posData[posIdx++] = p2.x;
-				posData[posIdx++] = p2.y;
-				posIdx++;
-				posData[posIdx++] = p3.x;
-				posData[posIdx++] = p3.y;
-				posIdx++;
-				posData[posIdx++] = p4.x;
-				posData[posIdx++] = p4.y;
-				posIdx++;
-				p += ParticleField.SIZE;
-			}
-			mesh.writer.positionWriter.upload(true);
-			mesh.writer.colorWriter.upload(true);
+			g.enableDepthTest();
 			g.drawObject(mesh);
-			g.resetShader();
+			g.disableDepthTest();
 		}
 	}
 
 	static function main() {
-		new MPM(cast Browser.document.getElementById("canvas"));
+		new Main(cast Browser.document.getElementById("canvas"));
 	}
 }

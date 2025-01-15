@@ -1,0 +1,25 @@
+﻿---
+AccessModifierOffset: "-4"
+AlignAfterOpenBracket: DontAlign
+AlignTrailingComments: Never
+AlignConsecutiveAssignments: "false"
+AlignConsecutiveDeclarations: "false"
+AlignEscapedNewlines: Left
+AlignOperands: "false"
+AllowShortBlocksOnASingleLine: "false"
+AllowShortCaseLabelsOnASingleLine: "false"
+AllowShortEnumsOnASingleLine: "false"
+AllowShortFunctionsOnASingleLine: None
+AllowShortIfStatementsOnASingleLine: Never
+AllowShortLambdasOnASingleLine: None
+AllowShortLoopsOnASingleLine: "false"
+AlwaysBreakTemplateDeclarations: "Yes"
+ColumnLimit: "110"
+IndentRequiresClause: "false"
+IndentWidth: "4"
+NamespaceIndentation: All
+PointerAlignment: Left
+SpaceAfterCStyleCast: "true"
+Standard: Cpp11
+TabWidth: "4"
+UseTab: AlignWithSpaces

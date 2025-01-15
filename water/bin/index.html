@@ -3,7 +3,6 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width,initial-scale=1.0,minimum-scale=1.0">
-	<title>Water</title>
 	<style>
 		html {
 			width: 100%;
@@ -49,6 +48,7 @@
 		#menu {
 			position: absolute;
 			display: flex;
+			flex-direction: column;
 
 			left: 16px;
 			top: 16px;
@@ -57,15 +57,23 @@
 			color: white;
 			user-select: none;
 			-webkit-user-select: none;
+			pointer-events: none;
 		}
 
 		.menu-item {
 			display: flex;
 			align-items: center;
 			margin-right: 4px;
+			pointer-events: auto;
 		}
 
-		input[type="radio"] {
+		.menu-row {
+			display: flex;
+			margin-bottom: 4px;
+		}
+
+		input[type="radio"],
+		input[type="checkbox"] {
 			margin: 0 4px;
 		}
 
@@ -84,15 +92,20 @@
 			<path fill="#fff" d="M 20 23 A 8 8 0 1 0 36 23 A 8 8 0 1 0 20 23 Z M 32 11 A 3 3 0 1 0 38 11 A 3 3 0 1 0 32 11 Z"></path>
 		</svg>
 	</a>
-	<div id="cover">
-		<div>Play</div>
-		<div>This content uses the device's motion.</div>
-	</div>
 	<div id="menu">
-		<label class="menu-item" for="low"><input type="radio" name="quality" id="low">Low</label>
-		<label class="menu-item" for="medium"><input type="radio" name="quality" id="medium">Medium</label>
-		<label class="menu-item" for="high"><input type="radio" name="quality" id="high">High</label>
-		<label class="menu-item" for="super"><input type="radio" name="quality" id="super">Super</label>
+		<div class="menu-row">
+			<label class="menu-item" for="low"><input type="radio" name="quality" id="low">Low</label>
+			<label class="menu-item" for="medium"><input type="radio" name="quality" id="medium">Medium</label>
+			<label class="menu-item" for="high"><input type="radio" name="quality" id="high">High</label>
+			<label class="menu-item" for="super"><input type="radio" name="quality" id="super">Super</label>
+		</div>
+		<div class="menu-row">
+			<label class="menu-item"><input type="checkbox" id="wasm" checked>WASM</label>
+			<label class="menu-item"><input type="checkbox" id="acc">Accelerometer</label>
+		</div>
+		<div class="menu-row">
+			<label class="menu-item" style="pointer-events:none;" id="info"></label>
+		</div>
 	</div>
 	<div id="wrapper"><canvas id="canvas"></canvas></div>
 	<script src="main.js"></script>

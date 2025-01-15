@@ -1,0 +1,24 @@
+{
+	// compile using emcc
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "emcc",
+			"type": "shell",
+			"command": "emcc",
+			"args": [
+				"-O3",
+				"--no-entry",
+				"-msimd128",
+				"src/main.cpp",
+				"-o",
+				"build/main.wasm"
+			],
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			},
+			"problemMatcher": []
+		}
+	]
+}

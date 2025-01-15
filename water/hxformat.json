@@ -1,0 +1,7 @@
+{
+	"lineEnds": {
+		"blockCurly": {
+			"emptyCurly": "break"
+		}
+	}
+}

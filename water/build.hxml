@@ -6,5 +6,5 @@
 -D analyzer-optimize
 --dce full
 -D js-es=6
--main MPM
+-main Main
 --js bin/main.js
